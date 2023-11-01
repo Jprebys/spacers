@@ -12,8 +12,8 @@ all: default
 debug: CFLAGS += -DDEBUG_MODE -g
 debug: default
 
-OBJECTS = $(patsubst %.cpp, %.o, $(wildcard $(SRC_DIR)/*.cpp))
-HEADERS = $(wildcard $(SRC_DIR)/*.h)
+OBJECTS =$(patsubst %.cpp, %.o, $(wildcard $(SRC_DIR)/*.cpp))
+HEADERS =$(wildcard $(SRC_DIR)/*.h)
 
 %.o: %.cpp $(HEADERS)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -26,7 +26,6 @@ $(TARGET): $(OBJECTS)
 clean:
 	-rm -f $(SRC_DIR)/*.o
 	-rm -f $(TARGET)
-	-rm -f *.ppm
 
 run: $(TARGET)
 	./$(TARGET)

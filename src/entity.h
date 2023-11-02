@@ -8,6 +8,8 @@
 struct Vec3f
 {
     float x, y, z;
+
+    void operator+(float n) {x += n; y += n; z += n;}
 };
 
 struct Triangle
@@ -20,7 +22,14 @@ struct Mesh
     std::vector<Triangle> triangles;
 };
 
+struct Matrix
+{
+    float m[4][4] = {0};
+};
+
 Mesh make_cube();
+Matrix create_mat_proj(int screen_height, int screen_width, float fov, float f_near, float f_far);
+void VecMatMul(Vec3f input, Vec3f &out, Matrix mat);
 
 
 // struct Triangle 

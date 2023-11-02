@@ -6,8 +6,6 @@
 
 #include "window.h"
 
-namespace spacers
-{
 
 Window::Window(std::string title, int height, int width)
 {
@@ -32,13 +30,9 @@ Window::Window(std::string title, int height, int width)
     }
 
     SDL_UpdateWindowSurface(m_window);
-    SDL_Delay(5000);
 }
 
 Window::~Window()
 {
     SDL_DestroyWindow(m_window);
 }
-
-
-} // namespace spacers

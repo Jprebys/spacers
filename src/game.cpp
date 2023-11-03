@@ -36,9 +36,40 @@ void Game::Run()
         m_renderer.FillScreen(BLACK);
 
         for (auto tri : cube.triangles) {
-            tri.RotateX(m_elapsed_time);
+
+            tri.RotateX(m_elapsed_time * 1);
             tri.RotateY(m_elapsed_time * 2);
-            tri.Translate(6, 0, 5);
+            tri.Translate(6, 0, 40);
+            tri.Project(m_proj_matrix);
+
+            if (tri.Visible()) {
+                tri.Translate(1, 1, 0);
+                tri.Scale(0.5f * m_screen_width, 0.5f * m_screen_height, 0);
+
+                m_renderer.FillTriangle(tri, tri.color);
+            }
+        }
+
+        for (auto tri : cube.triangles) {
+            
+            tri.RotateX(m_elapsed_time * 1);
+            tri.RotateY(m_elapsed_time * 2);
+            tri.Translate(0, 0, 40);
+            tri.Project(m_proj_matrix);
+
+            if (tri.Visible()) {
+                tri.Translate(1, 1, 0);
+                tri.Scale(0.5f * m_screen_width, 0.5f * m_screen_height, 0);
+
+                m_renderer.FillTriangle(tri, tri.color);
+            }
+        }
+
+        for (auto tri : cube.triangles) {
+            
+            tri.RotateX(m_elapsed_time * 1);
+            tri.RotateY(m_elapsed_time * 2);
+            tri.Translate(-6, 0, 40);
             tri.Project(m_proj_matrix);
 
             if (tri.Visible()) {

@@ -112,8 +112,8 @@ Matrix create_mat_proj(int screen_height, int screen_width, float fov, float f_n
     mat_proj.m[0][0] = aspect * f_fov_rad;
     mat_proj.m[1][1] = f_fov_rad;
     mat_proj.m[2][2] = f_far / (f_far - f_near);
-    mat_proj.m[3][2] = (-f_far * f_near) / (f_far - f_near);
-    mat_proj.m[2][3] = 1.0f;
+    mat_proj.m[2][3] = (-f_far * f_near) / (f_far - f_near);
+    mat_proj.m[3][2] = 1.0f;
 
     return mat_proj;
 }

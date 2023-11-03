@@ -133,6 +133,92 @@ void VecMatMul(Vec3f input, Vec3f &out, Matrix mat)
     // printf("%f %f %f    %f %f %f\n", input.x, input.y, input.z, out.x, out.y, out.z);
 }
 
+float VecDot(Vec3f a, Vec3f b)
+{
+    return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+bool Triangle::Visible()
+{
+    float determinant = v0.x * (v1.y - v2.y) +
+                        v1.x * (v2.y - v0.y) +
+                        v2.x * (v0.y - v1.y);
+    return determinant < 0;
+}
+
+void Triangle::Translate(float x, float y, float z)
+{
+    v0.x += x; v0.y += y; v0.z += z;
+    v1.x += x; v1.y += y; v1.z += z;
+    v2.x += x; v2.y += y; v2.z += z;
+}
+
+Vec3f rotate_x(Vec3f input, int degrees) 
+{
+    float rads = (float)degrees * 3.14159f / 180.0f;
+    Matrix mat;
+
+    mat.m[0][0] = 1.0f;
+    mat.m[1][1] = cosf(rads);
+    mat.m[1][2] = sinf(rads);
+    mat.m[2][1] = -sinf(rads);
+    mat.m[2][2] = cosf(rads);
+    mat.m[3][3] = 1.0f;
+
+    Vec3f result;
+    VecMatMul(input, result, mat);
+    return result;
+}
+
+Vec3f rotate_y(Vec3f input, int degrees) 
+{
+    float rads = (float)degrees * 3.14159f / 180.0f;
+    Matrix mat;
+
+    mat.m[0][0] = cosf(rads);
+    mat.m[0][2] = sinf(rads);
+    mat.m[1][1] = 1.0f;
+    mat.m[2][0] = -sinf(rads);
+    mat.m[2][2] = cosf(rads);
+    mat.m[3][3] = 1.0f;
+
+    Vec3f result;
+    VecMatMul(input, result, mat);
+    return result;
+}
+
+void Triangle::RotateX(int degrees)
+{
+    v0 = rotate_x(v0, degrees);
+    v1 = rotate_x(v1, degrees);
+    v2 = rotate_x(v2, degrees);
+    norm = rotate_x(norm, degrees); 
+}
+
+void Triangle::RotateY(int degrees)
+{
+    v0 = rotate_y(v0, degrees);
+    v1 = rotate_y(v1, degrees);
+    v2 = rotate_y(v2, degrees);
+    norm = rotate_y(norm, degrees);    
+}
+
+void Triangle::Scale(float x, float y, float z)
+{
+    v0.x *= x; v1.x *= x; v2.x *= x;
+    v0.y *= y; v1.y *= y; v2.y *= y;
+    v0.z *= z; v1.z *= z; v2.z *= z;
+}
+
+void Triangle::Project(Matrix proj_matrix)
+{
+    VecMatMul(v0, v0, proj_matrix);
+    VecMatMul(v1, v1, proj_matrix);
+    VecMatMul(v2, v2, proj_matrix);
+    VecMatMul(norm, norm, proj_matrix); 
+}
+
+
 // Cube::Cube()
 // {
 //     vertices = {

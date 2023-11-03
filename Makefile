@@ -1,16 +1,20 @@
 TARGET =spacers
 SRC_DIR =src
 CC =g++
-CFLAGS =-Wall -Wextra -std=c++17
+CFLAGS =-Wall -Wextra -Wpedantic -std=c++17
+LDFLAGS =-fsanitize=address
 LIBS =-lSDL2
 
-.PHONY: default all clean
+.PHONY: default all clean debug install release
 
 default: $(TARGET)
 all: default
 
-debug: CFLAGS += -DDEBUG_MODE -g
+debug: CFLAGS += -fsanitize=address -DDEBUG_MODE -g
 debug: default
+
+release: CFLAGS += -O3
+release: default
 
 OBJECTS =$(patsubst %.cpp, %.o, $(wildcard $(SRC_DIR)/*.cpp))
 HEADERS =$(wildcard $(SRC_DIR)/*.h)
@@ -21,7 +25,7 @@ HEADERS =$(wildcard $(SRC_DIR)/*.h)
 .PRECIOUS: $(TARGET) $(OBJECTS)
 
 $(TARGET): $(OBJECTS)
-	$(CC) $(OBJECTS) -Wall $(LIBS) -o $@
+	$(CC) $(OBJECTS) $(LDFLAGS) $(LIBS) -o $@
 
 clean:
 	-rm -f $(SRC_DIR)/*.o

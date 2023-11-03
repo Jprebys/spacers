@@ -15,6 +15,10 @@ struct Vec3f
 struct Triangle
 {
     Vec3f v0, v1, v2;
+
+    Vec3f norm;
+
+    uint32_t color;
 };
 
 struct Mesh

@@ -6,13 +6,74 @@ Mesh make_cube()
 {
     Mesh cube;
 
-    Vec3f vertices[] = {
-        { 1,-1, 1}, { 1,-1,-1}, 
-        { 1, 1,-1}, { 1, 1, 1},
-        {-1,-1, 1}, {-1,-1,-1}, 
-        {-1, 1,-1}, {-1, 1, 1} 
+
+    float verts[] = {
+    -1.0f,-1.0f,-1.0f, // triangle 1 : begin
+	-1.0f,-1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f, // triangle 1 : end
+
+	1.0f, 1.0f,-1.0f, // triangle 2 : begin
+	-1.0f,-1.0f,-1.0f,
+	-1.0f, 1.0f,-1.0f, // triangle 2 : end
+
+	1.0f,-1.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,
+	1.0f,-1.0f,-1.0f,
+
+	1.0f, 1.0f,-1.0f,
+	1.0f,-1.0f,-1.0f,
+	-1.0f,-1.0f,-1.0f,
+
+	-1.0f,-1.0f,-1.0f,
+	-1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f,-1.0f,
+
+	1.0f,-1.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,
+	-1.0f,-1.0f,-1.0f,
+
+	-1.0f, 1.0f, 1.0f,
+	-1.0f,-1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,
+
+	1.0f, 1.0f, 1.0f,
+	1.0f,-1.0f,-1.0f,
+	1.0f, 1.0f,-1.0f,
+
+	1.0f,-1.0f,-1.0f,
+	1.0f, 1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f,
+
+	1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f,-1.0f,
+	-1.0f, 1.0f,-1.0f,
+
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f,-1.0f,
+	-1.0f, 1.0f, 1.0f,
+
+	1.0f, 1.0f, 1.0f,
+	-1.0f, 1.0f, 1.0f,
+	1.0f,-1.0f, 1.0f
     };
 
+    Vec3f normals[] = {
+        {-1, 0, 0}, { 0, 0, -1},
+        { 0, -1, 0}, { 0, 0, -1},
+        { -1, 0,0}, { 0, -1,0},
+        { 0, 0, 1}, { 1, 0, 0},
+        { 1, 0, 0}, { 0, 1, 0},
+        { 0, 1, 0}, { 0, 0, 1} 
+    };
+
+    uint32_t colors[] = {
+        0xFF0000FF, 0xFFFFFFFF,
+        0xFFFF00FF, 0xFFFFFFFF,
+        0xFF0000FF, 0xFFFF00FF,
+        0x00FFFFFF, 0xFF00FFFF,
+        0xFF00FFFF, 0x0000FFFF,
+        0x0000FFFF, 0x00FFFFFF
+    };
 
     std::vector<std::array<int, 3>> indicies {
         {4, 0, 3}, 
@@ -29,12 +90,17 @@ Mesh make_cube()
         {0, 4, 5} 
     };
 
-    for (auto [t0, t1, t2] : indicies) {
-        Triangle triangle {vertices[t0], vertices[t1], vertices[t2]};
+    for (int i = 0, j = 0; i < 12; i++, j+=9) {
+        Vec3f a = {verts[j + 0], verts[j + 1], verts[j + 2]};
+        Vec3f b = {verts[j + 3], verts[j + 4], verts[j + 5]};
+        Vec3f c = {verts[j + 6], verts[j + 7], verts[j + 8]};
+        Triangle triangle {a, b, c, normals[i], colors[i]};
         cube.triangles.push_back(triangle);
     }
     return cube;
 }
+
+
 
 Matrix create_mat_proj(int screen_height, int screen_width, float fov, float f_near, float f_far)
 {

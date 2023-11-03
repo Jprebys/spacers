@@ -13,6 +13,7 @@ struct Renderer
     void FillScreen(uint32_t color);
     void DrawLine(Vec3f v0, Vec3f v1, uint32_t color);
     void DrawTriangle(Triangle triangle, uint32_t color);
+    void FillTriangle(Triangle triangle, uint32_t color);
     void DrawMesh(Mesh mesh, uint32_t color);
     void Show();
 

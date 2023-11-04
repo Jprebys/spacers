@@ -2,7 +2,7 @@
 
 #include "entity.h"
 
-Mesh make_cube()
+Entity make_cube(Vec3f position)
 {
     Mesh cube;
 
@@ -97,7 +97,9 @@ Mesh make_cube()
         Triangle triangle {a, b, c, normals[i], colors[i]};
         cube.triangles.push_back(triangle);
     }
-    return cube;
+
+    bool alive = true;
+    return {cube, position, alive};
 }
 
 
@@ -138,6 +140,28 @@ float VecDot(Vec3f a, Vec3f b)
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
+Vec3f Vec3f::operator-()
+{
+    return {-x, -y, -z};
+}
+
+Vec3f Vec3f::operator-(Vec3f other)
+{
+    return {x + other.x, y + other.y, z + other.z};
+}
+
+Vec3f Vec3f::operator+(Vec3f other)
+{
+    return {x - other.x, y - other.y, z - other.z};
+}
+
+Vec3f &Vec3f::operator=(float val)
+{
+    x = val; y = val; z = val;
+    return *this;
+}
+
+
 bool Triangle::Visible()
 {
     float determinant = v0.x * (v1.y - v2.y) +
@@ -146,11 +170,11 @@ bool Triangle::Visible()
     return determinant < 0;
 }
 
-void Triangle::Translate(float x, float y, float z)
+void Triangle::Translate(Vec3f update)
 {
-    v0.x += x; v0.y += y; v0.z += z;
-    v1.x += x; v1.y += y; v1.z += z;
-    v2.x += x; v2.y += y; v2.z += z;
+    v0.x += update.x; v0.y += update.y; v0.z += update.z;
+    v1.x += update.x; v1.y += update.y; v1.z += update.z;
+    v2.x += update.x; v2.y += update.y; v2.z += update.z;
 }
 
 Vec3f rotate_x(Vec3f input, int degrees) 

@@ -13,6 +13,11 @@ struct Matrix
 struct Vec3f
 {
     float x, y, z;
+
+    Vec3f operator-();
+    Vec3f operator-(Vec3f other);
+    Vec3f operator+(Vec3f other);
+    Vec3f &operator=(float val);
 };
 
 struct Triangle
@@ -23,7 +28,7 @@ struct Triangle
 
     uint32_t color;
 
-    void Translate(float x, float y, float z);
+    void Translate(Vec3f vec);
     void Scale(float x, float y, float z);
     void RotateY(int degrees);
     void RotateX(int degrees);
@@ -37,11 +42,17 @@ struct Mesh
     std::vector<Triangle> triangles;
 };
 
-Mesh make_cube();
+struct Entity
+{
+    Mesh mesh;
+    Vec3f position;
+    bool alive;
+};
+
+Entity make_cube(Vec3f position);
 Matrix create_mat_proj(int screen_height, int screen_width, float fov, float f_near, float f_far);
 void VecMatMul(Vec3f input, Vec3f &out, Matrix mat);
 float VecDot(Vec3f a, Vec3f b);
-bool TriVisible(Triangle tri);
 
 Vec3f rotate_x(Vec3f input, int degrees);
 Vec3f rotate_y(Vec3f input, int degrees);

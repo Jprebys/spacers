@@ -8,7 +8,6 @@
 
 #define MAX_ENTITIES 1024
 
-
 struct Game
 {
     Game(char *name, int screen_width, int screen_height, float fov, float f_near, float f_far);

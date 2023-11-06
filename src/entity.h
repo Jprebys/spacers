@@ -13,11 +13,15 @@ struct Matrix
 struct Vec3f
 {
     float x, y, z;
+    float w = 1;
 
     Vec3f operator-();
     Vec3f operator-(Vec3f other);
     Vec3f operator+(Vec3f other);
+    Vec3f operator/(float val);
     Vec3f &operator=(float val);
+
+    float Length();
 };
 
 struct Triangle
@@ -49,10 +53,13 @@ struct Entity
     bool alive;
 };
 
+Entity create_entity_from_file(char *filename, uint32_t color, Vec3f position);
 Entity make_cube(Vec3f position);
 Matrix create_mat_proj(int screen_height, int screen_width, float fov, float f_near, float f_far);
 void VecMatMul(Vec3f input, Vec3f &out, Matrix mat);
 float VecDot(Vec3f a, Vec3f b);
+
+Vec3f VecCross(Vec3f a, Vec3f b);
 
 Vec3f rotate_x(Vec3f input, int degrees);
 Vec3f rotate_y(Vec3f input, int degrees);

@@ -54,12 +54,12 @@ void Renderer::DrawMesh(Mesh mesh, uint32_t color)
     }
 }
 
-void Renderer::FillTriangle(Triangle tri, uint32_t color)
+void Renderer::FillTriangle(Triangle tri, uint32_t color, float brightness)
 {
     SDL_Color sdl_color;
-    sdl_color.r = (color >> 24) & 0xFF;
-    sdl_color.g = (color >> 16) & 0xFF;
-    sdl_color.b = (color >>  8) & 0xFF;
+    sdl_color.r = (float)((color >> 24) & 0xFF) * brightness;
+    sdl_color.g = (float)((color >> 16) & 0xFF) * brightness;
+    sdl_color.b = (float)((color >>  8) & 0xFF) * brightness;
     sdl_color.a = (color >>  0) & 0xFF;
 
     SDL_Vertex verts[3] = {

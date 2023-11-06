@@ -76,21 +76,24 @@ void Game::ProcessInput()
 void Game::InitGame()
 {
     Vec3f positions[] = {
-        {-6, 0, 40},
-        {0 , 0, 40},
-        {6 , 0, 40},
-        {0 , 6, 40},
-        {0, -6, 40},
-        {4, 4, 80},
-        {-4, -4, 80},
-        {4, -4, 80},
-        {-4, 4, 80},
+        // {-6, 0, 40},
+        {0 , 0, 100},
+        // {6 , 0, 40},
+        // {0 , 6, 40},
+        // {0, -6, 40},
+        // {4, 4, 80},
+        // {-4, -4, 80},
+        // {4, -4, 80},
+        // {-4, 4, 80},
  
 
     };
+    char teapot_file[] = "assets/teapot2.obj";
 
     for (size_t i = 0; i < sizeof(positions)/sizeof(Vec3f); ++i) {
-        m_entities[i] = make_cube(positions[i]);
+        // m_entities[i] = make_cube(positions[i]);
+        m_entities[i] = create_entity_from_file(teapot_file, 0xAAAA00FF, positions[i]);
+
         ++m_entity_count;
     }
 }
@@ -103,6 +106,10 @@ void Game::UpdatePosition()
 void Game::DrawScene()
 {
     m_renderer.FillScreen(BLACK);
+
+    Vec3f light {0, 0, -1};
+    float l = light.Length();
+    light.x /= l; light.y /= l; light.z /= l;
 
     for (size_t i = 0; i < m_entity_count; ++i) {
 
@@ -122,7 +129,11 @@ void Game::DrawScene()
                 tri.Translate({1, 1, 0});
                 tri.Scale(0.5f * m_screen_width, 0.5f * m_screen_height, 0);
 
-                m_renderer.FillTriangle(tri, tri.color);
+                tri.norm = tri.norm / tri.norm.Length();
+                float dp = VecDot(tri.norm, light);
+                // m_renderer.DrawTriangle(tri, WHITE);
+                dp = 1;
+                m_renderer.FillTriangle(tri, tri.color, dp);
             }
         }
     }

@@ -2,7 +2,7 @@ TARGET =spacers
 SRC_DIR =src
 CC =g++
 CFLAGS =-Wall -Wextra -Wpedantic -std=c++17
-LDFLAGS =-fsanitize=address
+LDFLAGS =
 LIBS =-lSDL2
 
 .PHONY: default all clean debug install release
@@ -11,6 +11,7 @@ default: $(TARGET)
 all: default
 
 debug: CFLAGS += -fsanitize=address -DDEBUG_MODE -g
+debug: LDFLAGS += -fsanitize=address
 debug: default
 
 release: CFLAGS += -O3

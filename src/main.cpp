@@ -8,7 +8,7 @@
 #include "entity.h"
 #include "renderer.h"
 
-int main(void)
+int main()
 {
     int screen_width = 1200;
     int screen_height = 800;

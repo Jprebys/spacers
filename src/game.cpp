@@ -1,4 +1,10 @@
+#include <algorithm>
+
 #include "game.h"
+
+#define TRIANGLE_VEC_SIZE 1024 * 1024
+#define MIN_BRIGHTNESS .1f
+
 
 Game::Game(char *name, int screen_width, int screen_height, 
            float fov, float f_near, float f_far)
@@ -11,6 +17,8 @@ Game::Game(char *name, int screen_width, int screen_height,
     m_proj_matrix = create_mat_proj(screen_height, screen_width, fov, f_near, f_far);
 
     m_entities = new Entity[MAX_ENTITIES];
+
+    m_triangles.reserve(TRIANGLE_VEC_SIZE);
 }
 
 Game::~Game()
@@ -76,23 +84,12 @@ void Game::ProcessInput()
 void Game::InitGame()
 {
     Vec3f positions[] = {
-        // {-6, 0, 40},
-        {0 , 0, 100},
-        // {6 , 0, 40},
-        // {0 , 6, 40},
-        // {0, -6, 40},
-        // {4, 4, 80},
-        // {-4, -4, 80},
-        // {4, -4, 80},
-        // {-4, 4, 80},
- 
-
+        {0 , 0, 20},
     };
-    char teapot_file[] = "assets/teapot2.obj";
+    char teapot_file[] = "assets/spaceship.obj";
 
     for (size_t i = 0; i < sizeof(positions)/sizeof(Vec3f); ++i) {
-        // m_entities[i] = make_cube(positions[i]);
-        m_entities[i] = create_entity_from_file(teapot_file, 0xAAAA00FF, positions[i]);
+        m_entities[i] = create_entity_from_file(teapot_file, 0xBBBBBBFF, positions[i]);
 
         ++m_entity_count;
     }
@@ -123,22 +120,33 @@ void Game::DrawScene()
             Vec3f new_pos = cube.position - m_camera_pos;
 
             tri.Translate(new_pos);
+            Vec3f norm = VecCross(tri.v1 - tri.v0, tri.v2 - tri.v0);
+            norm = norm / norm.Length();
+
             tri.Project(m_proj_matrix);
 
             if (tri.Visible()) {
                 tri.Translate({1, 1, 0});
-                tri.Scale(0.5f * m_screen_width, 0.5f * m_screen_height, 0);
+                tri.Scale(0.5f * m_screen_width, 0.5f * m_screen_height, 1);
 
-                tri.norm = tri.norm / tri.norm.Length();
-                float dp = VecDot(tri.norm, light);
-                // m_renderer.DrawTriangle(tri, WHITE);
-                dp = 1;
-                m_renderer.FillTriangle(tri, tri.color, dp);
+
+                // tri.norm = (tri.norm / tri.norm.Length());
+                float dp = VecDot(norm, light);
+                dp = std::max(MIN_BRIGHTNESS, dp);
+                m_triangles.emplace_back(tri, dp);
             }
         }
     }
 
+    std::sort(m_triangles.begin(), m_triangles.end(), &TriangleDepthCmp);
+
+    for (auto [tri, brightness] : m_triangles) {
+        m_renderer.FillTriangle(tri, tri.color, brightness);
+        m_renderer.DrawTriangle(tri, WHITE);
+    }
+
     m_renderer.Show();
+    m_triangles.clear();
 }
 
 void Game::Run()

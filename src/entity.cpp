@@ -236,6 +236,14 @@ void Triangle::Project(Matrix proj_matrix)
     // VecMatMul(norm, norm, proj_matrix); 
 }
 
+bool TriangleDepthCmp(const std::pair<Triangle, float> &first_pair, const std::pair<Triangle, float> &second_pair)
+{
+    Triangle first = first_pair.first; Triangle second = second_pair.first;
+    float first_center = (first.v0.z + first.v1.z + first.v2.z);
+    float second_center = (second.v0.z + second.v1.z + second.v2.z);
+    return first_center < second_center;
+}
+
 Entity make_cube(Vec3f position)
 {
     Mesh cube;

@@ -37,4 +37,6 @@ struct Game
 
     Entity *m_entities;
     size_t m_entity_count;
+
+    std::vector<std::pair<Triangle, float>> m_triangles;
 };

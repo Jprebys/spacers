@@ -5,7 +5,7 @@
 
 Renderer::Renderer(SDL_Window *window)
 {
-    m_renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+    m_renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (!m_renderer) {
         printf("[ERROR] Could not create renderer\n");
         throw std::runtime_error("Could not create renderer");

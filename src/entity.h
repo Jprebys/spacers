@@ -13,7 +13,6 @@ struct Matrix
 struct Vec3f
 {
     float x, y, z;
-    float w = 1;
 
     Vec3f operator-();
     Vec3f operator-(Vec3f other);
@@ -52,6 +51,8 @@ struct Entity
     Vec3f position;
     bool alive;
 };
+
+bool TriangleDepthCmp(const std::pair<Triangle, float> &first_pair, const std::pair<Triangle, float> &second_pair);
 
 Entity create_entity_from_file(char *filename, uint32_t color, Vec3f position);
 Entity make_cube(Vec3f position);

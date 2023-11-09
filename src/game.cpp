@@ -84,9 +84,9 @@ void Game::ProcessInput()
 void Game::InitGame()
 {
     Vec3f positions[] = {
-        {0 , 0, 20},
+        {0 , 0, 40},
     };
-    char teapot_file[] = "assets/spaceship.obj";
+    char teapot_file[] = "assets/teapot2.obj";
 
     for (size_t i = 0; i < sizeof(positions)/sizeof(Vec3f); ++i) {
         m_entities[i] = create_entity_from_file(teapot_file, 0xBBBBBBFF, positions[i]);

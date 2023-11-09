@@ -12,7 +12,7 @@ int main()
 {
     int screen_width = 1200;
     int screen_height = 800;
-    float fov = 130.0f;
+    float fov = 90.0f;
     float f_near = 0.1f;
     float f_far = 1000.0f;
     char name[] = "Spacers";

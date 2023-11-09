@@ -1,4 +1,5 @@
 TARGET =spacers
+INSTALL_DIR =/usr/local/bin
 SRC_DIR =src
 CC =g++
 CFLAGS =-Wall -Wextra -Wpedantic -std=c++17
@@ -36,7 +37,7 @@ run: $(TARGET)
 	./$(TARGET)
 
 install: all
-	cp $(TARGET) /usr/local/bin/$(TARGET)
+	cp $(TARGET) $(INSTALL_DIR)/$(TARGET)
 
 uninstall:
-	rm -f /usr/local/bin/$(TARGET)
+	rm -f $(INSTALL_DIR)/$(TARGET)

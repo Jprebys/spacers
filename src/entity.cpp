@@ -119,7 +119,7 @@ float VecDot(Vec3f a, Vec3f b)
 
 Vec3f VecCross(Vec3f a, Vec3f b) {
     float x = a.y * b.z - a.z * b.y;
-    float y = a.z * b.y - a.x * b.z;
+    float y = a.z * b.x - a.x * b.z;
     float z = a.x * b.y - a.y * b.x;
     return {x, y, z};
 }
@@ -129,12 +129,12 @@ Vec3f Vec3f::operator-()
     return {-x, -y, -z};
 }
 
-Vec3f Vec3f::operator-(Vec3f other)
+Vec3f Vec3f::operator+(Vec3f other)
 {
     return {x + other.x, y + other.y, z + other.z};
 }
 
-Vec3f Vec3f::operator+(Vec3f other)
+Vec3f Vec3f::operator-(Vec3f other)
 {
     return {x - other.x, y - other.y, z - other.z};
 }
@@ -230,10 +230,13 @@ void Triangle::Scale(float x, float y, float z)
 
 void Triangle::Project(Matrix proj_matrix)
 {
-    VecMatMul(v0, v0, proj_matrix);
-    VecMatMul(v1, v1, proj_matrix);
-    VecMatMul(v2, v2, proj_matrix);
-    // VecMatMul(norm, norm, proj_matrix); 
+    Vec3f new_v0, new_v1, new_v2;
+    VecMatMul(v0, new_v0, proj_matrix);
+    VecMatMul(v1, new_v1, proj_matrix);
+    VecMatMul(v2, new_v2, proj_matrix);
+    v0 = new_v0; 
+    v1 = new_v1; 
+    v2 = new_v2;
 }
 
 bool TriangleDepthCmp(const std::pair<Triangle, float> &first_pair, const std::pair<Triangle, float> &second_pair)

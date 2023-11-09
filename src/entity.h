@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <array>
 #include <vector>
 
@@ -21,6 +22,7 @@ struct Vec3f
     Vec3f &operator=(float val);
 
     float Length();
+    void Print() {printf("x: %f  y: %f  z: %f\n", x, y, z);}
 };
 
 struct Triangle

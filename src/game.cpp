@@ -110,29 +110,36 @@ void Game::DrawScene()
 
     for (size_t i = 0; i < m_entity_count; ++i) {
 
-        Entity cube = m_entities[i];
+        Entity entity = m_entities[i];
 
-        for (auto tri : cube.mesh.triangles) {
+        for (auto tri : entity.mesh.triangles) {
 
             tri.RotateX(m_elapsed_time * 1);
             tri.RotateY(m_elapsed_time * 2);
 
-            Vec3f new_pos = cube.position - m_camera_pos;
+            Vec3f new_pos = entity.position - m_camera_pos;
 
             tri.Translate(new_pos);
             Vec3f norm = VecCross(tri.v1 - tri.v0, tri.v2 - tri.v0);
             norm = norm / norm.Length();
 
-            tri.Project(m_proj_matrix);
 
-            if (tri.Visible()) {
+            if (norm.x * (tri.v0.x - m_camera_pos.x) +
+                norm.y * (tri.v0.y - m_camera_pos.y) +
+                norm.z * (tri.v0.z - m_camera_pos.z) < 0.0f) {
+
+                float dp = VecDot(norm, light);
+                dp = std::max(MIN_BRIGHTNESS, dp);
+                tri.Project(m_proj_matrix);
+
+
+            // if (tri.Visible()) {
                 tri.Translate({1, 1, 0});
                 tri.Scale(0.5f * m_screen_width, 0.5f * m_screen_height, 1);
 
 
                 // tri.norm = (tri.norm / tri.norm.Length());
-                float dp = VecDot(norm, light);
-                dp = std::max(MIN_BRIGHTNESS, dp);
+
                 m_triangles.emplace_back(tri, dp);
             }
         }
@@ -142,7 +149,7 @@ void Game::DrawScene()
 
     for (auto [tri, brightness] : m_triangles) {
         m_renderer.FillTriangle(tri, tri.color, brightness);
-        m_renderer.DrawTriangle(tri, WHITE);
+        // m_renderer.DrawTriangle(tri, WHITE);
     }
 
     m_renderer.Show();

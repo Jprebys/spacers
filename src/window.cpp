@@ -1,6 +1,7 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <cinttypes>
 
 #include <SDL2/SDL.h>
 
@@ -8,6 +9,7 @@
 
 
 Window::Window(std::string title, int height, int width)
+  : m_title(title)
 {
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("[ERROR] Failed to initialize SDL\n");
@@ -30,6 +32,14 @@ Window::Window(std::string title, int height, int width)
     }
 
     SDL_UpdateWindowSurface(m_window);
+}
+
+void Window::UpdateTitle(uint32_t frame_time)
+{
+    const size_t NEW_TITLE_LEN = 128;
+    char new_title[NEW_TITLE_LEN];
+    snprintf(new_title, NEW_TITLE_LEN, "%s (%" PRIu32 " ms)", m_title.c_str(), frame_time);
+    SDL_SetWindowTitle(m_window, new_title);
 }
 
 Window::~Window()

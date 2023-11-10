@@ -32,6 +32,7 @@ struct Game
     Renderer m_renderer;
 
     Vec3f m_camera_pos;
+    Vec3f m_camera_look;
     Vec3f m_camera_velocity;
     float m_movement_speed;
 

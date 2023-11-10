@@ -6,40 +6,48 @@
 #include <array>
 #include <vector>
 
-struct Matrix
-{
-    float m[4][4] = {0};
-};
 
 struct Vec3f
 {
     float x, y, z;
 
+    float w = 1;
+
     Vec3f operator-();
     Vec3f operator-(Vec3f other);
     Vec3f operator+(Vec3f other);
+    Vec3f operator*(float val);
     Vec3f operator/(float val);
     Vec3f &operator=(float val);
 
     float Length();
+    void Normalize();
     void Print() {printf("x: %f  y: %f  z: %f\n", x, y, z);}
+};
+
+struct Matrix
+{
+    float m[4][4] = {0};
+
+    void Invert();
+    void PointAt(Vec3f &pos, Vec3f &target, Vec3f &up);
 };
 
 struct Triangle
 {
     Vec3f v0, v1, v2;
 
-    Vec3f norm;
-
     uint32_t color;
 
     void Translate(Vec3f vec);
     void Scale(float x, float y, float z);
-    void RotateY(int degrees);
     void RotateX(int degrees);
+    void RotateY(int degrees);
+    void RotateZ(int degrees);
     void Project(Matrix proj_matrix);
 
     bool Visible();
+    bool OnScreen();
 };
 
 struct Mesh
@@ -66,7 +74,7 @@ Vec3f VecCross(Vec3f a, Vec3f b);
 
 Vec3f rotate_x(Vec3f input, int degrees);
 Vec3f rotate_y(Vec3f input, int degrees);
-
+Vec3f rotate_z(Vec3f input, int degrees);
 
 // struct Triangle 
 // {

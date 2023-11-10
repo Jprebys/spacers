@@ -19,7 +19,6 @@ Entity create_entity_from_file(char *filename, uint32_t color, Vec3f position)
     int t0, t1, t2;
     int n0, n1, n2;
     int rc;
-    Vec3f temp;
 
     std::ifstream obj_file(filename);
     for (std::string line; getline(obj_file, line); ) {
@@ -52,8 +51,8 @@ Entity create_entity_from_file(char *filename, uint32_t color, Vec3f position)
                     Vec3f vec0 = verts[v0 - 1];
                     Vec3f vec1 = verts[v1 - 1];
                     Vec3f vec2 = verts[v2 - 1];
-                    Vec3f norm = norms[n0 - 1];
-                    Triangle tri {vec0, vec1, vec2, norm, color};
+                    // Vec3f norm = norma[n0 - 1];
+                    Triangle tri {vec0, vec1, vec2, color};
                     result.mesh.triangles.push_back(tri);     
                 } else {
                     // Our file does not have normal info, need to calculate it
@@ -65,8 +64,8 @@ Entity create_entity_from_file(char *filename, uint32_t color, Vec3f position)
                     Vec3f vec0 = verts[v0 - 1];
                     Vec3f vec1 = verts[v1 - 1];
                     Vec3f vec2 = verts[v2 - 1];
-                    Vec3f norm = VecCross(vec1 - vec0, vec2 - vec0);
-                    Triangle tri {vec0, vec1, vec2, norm, color};
+                    // Vec3f norm = VecCross(vec1 - vec0, vec2 - vec0);
+                    Triangle tri {vec0, vec1, vec2, color};
                     result.mesh.triangles.push_back(tri);
                 }
 
@@ -91,24 +90,18 @@ Matrix create_mat_proj(int screen_height, int screen_width, float fov, float f_n
     mat_proj.m[0][0] = aspect * f_fov_rad;
     mat_proj.m[1][1] = f_fov_rad;
     mat_proj.m[2][2] = f_far / (f_far - f_near);
-    mat_proj.m[2][3] = (-f_far * f_near) / (f_far - f_near);
-    mat_proj.m[3][2] = 1.0f;
+    mat_proj.m[3][2] = (-f_far * f_near) / (f_far - f_near);
+    mat_proj.m[2][3] = 1.0f;
 
     return mat_proj;
 }
 
 void VecMatMul(Vec3f input, Vec3f &out, Matrix mat)
 {
-    out.x = input.x * mat.m[0][0] + input.y * mat.m[1][0] + input.z * mat.m[2][0] + mat.m[3][0];
-    out.y = input.x * mat.m[0][1] + input.y * mat.m[1][1] + input.z * mat.m[2][1] + mat.m[3][1];
-    out.z = input.x * mat.m[0][2] + input.y * mat.m[1][2] + input.z * mat.m[2][2] + mat.m[3][2];
-    float w = input.x * mat.m[0][3] + input.y * mat.m[1][3] + input.z * mat.m[2][3] + mat.m[3][3];
-
-    if (w != 0.0f) {
-        out.x /= w;
-        out.y /= w;
-        out.z /= w;
-    }
+    out.x = input.x * mat.m[0][0] + input.y * mat.m[1][0] + input.z * mat.m[2][0] + input.w * mat.m[3][0];
+    out.y = input.x * mat.m[0][1] + input.y * mat.m[1][1] + input.z * mat.m[2][1] + input.w * mat.m[3][1];
+    out.z = input.x * mat.m[0][2] + input.y * mat.m[1][2] + input.z * mat.m[2][2] + input.w * mat.m[3][2];
+    out.w = input.x * mat.m[0][3] + input.y * mat.m[1][3] + input.z * mat.m[2][3] + input.w * mat.m[3][3];
     // printf("%f %f %f    %f %f %f\n", input.x, input.y, input.z, out.x, out.y, out.z);
 }
 
@@ -141,7 +134,7 @@ Vec3f Vec3f::operator-(Vec3f other)
 
 Vec3f &Vec3f::operator=(float val)
 {
-    x = val; y = val; z = val;
+    x = val; y = val; z = val; w = val;
     return *this;
 }
 
@@ -150,11 +143,21 @@ Vec3f Vec3f::operator/(float val)
     return {x / val, y / val, z / val};
 }
 
+Vec3f Vec3f::operator*(float val)
+{
+    return {x * val, y * val, z * val};
+}
+
 float Vec3f::Length()
 {
     return sqrtf(x*x + y*y + z*z);
 }
 
+void Vec3f::Normalize()
+{
+    float length = Length();
+    x /= length; y /= length; z /= length;
+}
 
 bool Triangle::Visible()
 {
@@ -164,6 +167,14 @@ bool Triangle::Visible()
     return determinant < 0;
 }
 
+bool Triangle::OnScreen()
+{
+    bool a = (v0.x > -1 && v0.x < 1) && (v0.y > -1 && v0.y < 1);
+    bool b = (v1.x > -1 && v1.x < 1) && (v1.y > -1 && v1.y < 1);
+    bool c = (v2.x > -1 && v2.x < 1) && (v2.y > -1 && v2.y < 1);
+    return a && b && c;
+}
+
 void Triangle::Translate(Vec3f update)
 {
     v0.x += update.x; v0.y += update.y; v0.z += update.z;
@@ -171,6 +182,7 @@ void Triangle::Translate(Vec3f update)
     v2.x += update.x; v2.y += update.y; v2.z += update.z;
 }
 
+// TODO: Cache these rotation matrices
 Vec3f rotate_x(Vec3f input, int degrees) 
 {
     float rads = (float)degrees * 3.14159f / 180.0f;
@@ -178,8 +190,8 @@ Vec3f rotate_x(Vec3f input, int degrees)
 
     mat.m[0][0] = 1.0f;
     mat.m[1][1] = cosf(rads);
-    mat.m[1][2] = sinf(rads);
-    mat.m[2][1] = -sinf(rads);
+    mat.m[2][1] = sinf(rads);
+    mat.m[1][2] = -sinf(rads);
     mat.m[2][2] = cosf(rads);
     mat.m[3][3] = 1.0f;
 
@@ -194,9 +206,9 @@ Vec3f rotate_y(Vec3f input, int degrees)
     Matrix mat;
 
     mat.m[0][0] = cosf(rads);
-    mat.m[0][2] = sinf(rads);
+    mat.m[2][0] = sinf(rads);
     mat.m[1][1] = 1.0f;
-    mat.m[2][0] = -sinf(rads);
+    mat.m[0][2] = -sinf(rads);
     mat.m[2][2] = cosf(rads);
     mat.m[3][3] = 1.0f;
 
@@ -205,12 +217,29 @@ Vec3f rotate_y(Vec3f input, int degrees)
     return result;
 }
 
+Vec3f rotate_z(Vec3f input, int degrees)
+{
+    float rads = (float)degrees * 3.14159f / 180.0f;
+    Matrix mat;
+
+    mat.m[0][0] = cosf(rads);
+    mat.m[1][0] = sinf(rads);
+    mat.m[0][1] = -sinf(rads);
+    mat.m[1][1] = cosf(rads);
+    mat.m[2][2] = 1.0f;
+    mat.m[3][3] = 1.0f;
+
+    Vec3f result;
+    VecMatMul(input, result, mat);
+    return result;    
+}
+
+
 void Triangle::RotateX(int degrees)
 {
     v0 = rotate_x(v0, degrees);
     v1 = rotate_x(v1, degrees);
     v2 = rotate_x(v2, degrees);
-    norm = rotate_x(norm, degrees); 
 }
 
 void Triangle::RotateY(int degrees)
@@ -218,7 +247,13 @@ void Triangle::RotateY(int degrees)
     v0 = rotate_y(v0, degrees);
     v1 = rotate_y(v1, degrees);
     v2 = rotate_y(v2, degrees);
-    norm = rotate_y(norm, degrees);    
+}
+
+void Triangle::RotateZ(int degrees)
+{
+    v0 = rotate_z(v0, degrees);
+    v1 = rotate_z(v1, degrees);
+    v2 = rotate_z(v2, degrees);
 }
 
 void Triangle::Scale(float x, float y, float z)
@@ -234,9 +269,9 @@ void Triangle::Project(Matrix proj_matrix)
     VecMatMul(v0, new_v0, proj_matrix);
     VecMatMul(v1, new_v1, proj_matrix);
     VecMatMul(v2, new_v2, proj_matrix);
-    v0 = new_v0; 
-    v1 = new_v1; 
-    v2 = new_v2;
+    v0 = new_v0 / new_v0.w; 
+    v1 = new_v1 / new_v0.w; 
+    v2 = new_v2 / new_v0.w;
 }
 
 bool TriangleDepthCmp(const std::pair<Triangle, float> &first_pair, const std::pair<Triangle, float> &second_pair)
@@ -246,6 +281,50 @@ bool TriangleDepthCmp(const std::pair<Triangle, float> &first_pair, const std::p
     float second_center = (second.v0.z + second.v1.z + second.v2.z);
     return first_center < second_center;
 }
+
+// ONLY WORKS FOR TRANSLATION/ROTATION MATRICIES
+void Matrix::Invert()
+{
+    float result[4][4];
+    result[0][0] = m[0][0]; result[0][1] = m[1][0]; result[0][2] = m[2][0];
+    result[1][0] = m[0][1]; result[1][1] = m[1][1]; result[1][2] = m[2][1];   
+    result[2][0] = m[0][2]; result[2][1] = m[1][2]; result[2][2] = m[2][2];
+    Vec3f a = {m[0][0], m[0][1], m[0][2]};
+    Vec3f b = {m[1][0], m[1][1], m[1][2]};
+    Vec3f c = {m[2][0], m[2][1], m[2][2]};
+    Vec3f t = {m[3][0], m[3][1], m[3][2]};
+    result[3][0] = -VecDot(t, a);
+    result[3][1] = -VecDot(t, b);
+    result[3][2] = -VecDot(t, c);
+    result[3][3] = 1.0f;
+
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            m[i][j] = result[i][j];
+        }
+    }
+}
+
+void Matrix::PointAt(Vec3f &pos, Vec3f &target, Vec3f &up)
+{
+    // New forward direction
+    Vec3f new_forward = target - pos;
+    new_forward.Normalize();
+
+    // New up direction
+    Vec3f a = new_forward * VecDot(up, new_forward);
+    Vec3f new_up = up - a;
+    new_up.Normalize();
+
+    // New right direction
+    Vec3f new_right = VecCross(new_up, new_forward);
+
+    m[0][0] = new_right.x; m[0][1] = new_right.y; m[0][2] = new_right.z;
+    m[1][0] = new_up.x; m[1][1] = new_up.y; m[1][2] = new_up.z;
+    m[2][0] = new_forward.x; m[2][1] = new_forward.y; m[2][2] = new_forward.z;
+    m[3][0] = pos.x; m[3][1] = pos.y; m[3][2] = pos.z;
+}
+
 
 Entity make_cube(Vec3f position)
 {
@@ -302,14 +381,14 @@ Entity make_cube(Vec3f position)
 	1.0f,-1.0f, 1.0f
     };
 
-    Vec3f normals[] = {
-        {-1, 0, 0}, { 0, 0, -1},
-        { 0, -1, 0}, { 0, 0, -1},
-        { -1, 0,0}, { 0, -1,0},
-        { 0, 0, 1}, { 1, 0, 0},
-        { 1, 0, 0}, { 0, 1, 0},
-        { 0, 1, 0}, { 0, 0, 1} 
-    };
+    // Vec3f normals[] = {
+    //     {-1, 0, 0}, { 0, 0, -1},
+    //     { 0, -1, 0}, { 0, 0, -1},
+    //     { -1, 0,0}, { 0, -1,0},
+    //     { 0, 0, 1}, { 1, 0, 0},
+    //     { 1, 0, 0}, { 0, 1, 0},
+    //     { 0, 1, 0}, { 0, 0, 1} 
+    // };
 
     // uint32_t colors[] = {
     //     0xFF0000FF, 0xFFFFFFFF,
@@ -339,8 +418,7 @@ Entity make_cube(Vec3f position)
         Vec3f a = {verts[j + 0], verts[j + 1], verts[j + 2]};
         Vec3f b = {verts[j + 3], verts[j + 4], verts[j + 5]};
         Vec3f c = {verts[j + 6], verts[j + 7], verts[j + 8]};
-        // Triangle triangle {a, b, c, normals[i], colors[i]};
-        Triangle triangle {a, b, c, normals[i], 0xFF00FFFF};
+        Triangle triangle {a, b, c, 0xFF00FFFF};
 
         cube.triangles.push_back(triangle);
     }

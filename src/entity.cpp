@@ -134,7 +134,7 @@ Vec3f Vec3f::operator-(Vec3f other)
 
 Vec3f &Vec3f::operator=(float val)
 {
-    x = val; y = val; z = val; w = val;
+    x = val; y = val; z = val;
     return *this;
 }
 
@@ -266,12 +266,12 @@ void Triangle::Scale(float x, float y, float z)
 void Triangle::Project(Matrix proj_matrix)
 {
     Vec3f new_v0, new_v1, new_v2;
-    VecMatMul(v0, new_v0, proj_matrix);
-    VecMatMul(v1, new_v1, proj_matrix);
-    VecMatMul(v2, new_v2, proj_matrix);
-    v0 = new_v0 / new_v0.w; 
-    v1 = new_v1 / new_v0.w; 
-    v2 = new_v2 / new_v0.w;
+    VecMatMul(v0, v0, proj_matrix);
+    VecMatMul(v1, v1, proj_matrix);
+    VecMatMul(v2, v2, proj_matrix);
+    if (v0.w) v0 = v0 / v0.w; 
+    if (v1.w) v1 = v1 / v1.w; 
+    if (v2.w) v2 = v2 / v2.w;
 }
 
 bool TriangleDepthCmp(const std::pair<Triangle, float> &first_pair, const std::pair<Triangle, float> &second_pair)
@@ -300,7 +300,7 @@ void Matrix::Invert()
 
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
-            m[i][j] = result[i][j];
+            m[j][i] = result[i][j];
         }
     }
 }
@@ -319,10 +319,10 @@ void Matrix::PointAt(Vec3f &pos, Vec3f &target, Vec3f &up)
     // New right direction
     Vec3f new_right = VecCross(new_up, new_forward);
 
-    m[0][0] = new_right.x; m[0][1] = new_right.y; m[0][2] = new_right.z;
-    m[1][0] = new_up.x; m[1][1] = new_up.y; m[1][2] = new_up.z;
+    m[0][0] = new_right.x;   m[0][1] = new_right.y;   m[0][2] = new_right.z;
+    m[1][0] = new_up.x;      m[1][1] = new_up.y;      m[1][2] = new_up.z;
     m[2][0] = new_forward.x; m[2][1] = new_forward.y; m[2][2] = new_forward.z;
-    m[3][0] = pos.x; m[3][1] = pos.y; m[3][2] = pos.z;
+    m[3][0] = pos.x;         m[3][1] = pos.y;         m[3][2] = pos.z;         m[3][3] = 1;
 }
 
 

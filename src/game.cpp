@@ -86,9 +86,9 @@ void Game::ProcessInput()
 void Game::InitGame()
 {
     Vec3f positions[] = {
-        {0 , 0, 50},
+        {0 , 0, 5},
     };
-    char teapot_file[] = "assets/teapot.obj";
+    char teapot_file[] = "assets/teapot2.obj";
 
     for (size_t i = 0; i < sizeof(positions)/sizeof(Vec3f); ++i) {
         m_entities[i] = create_entity_from_file(teapot_file, 0xBBBBBBFF, positions[i]);
@@ -125,8 +125,8 @@ void Game::DrawScene()
 
         for (auto tri : entity.mesh.triangles) {
 
-            // tri.RotateX(m_elapsed_time * 1);
-            // tri.RotateY(m_elapsed_time * 2);
+            tri.RotateX(m_elapsed_time * 1);
+            tri.RotateY(m_elapsed_time * 2);
             tri.RotateZ(m_elapsed_time * .5);
 
             // Vec3f new_pos = entity.position - m_camera_pos;
@@ -141,11 +141,9 @@ void Game::DrawScene()
                 float dp = VecDot(norm, light);
                 dp = std::max(MIN_BRIGHTNESS, dp);
 
-                // VecMatMul(tri.v0, tri.v0, camera_matrix);
-                // VecMatMul(tri.v1, tri.v1, camera_matrix);
-                // VecMatMul(tri.v2, tri.v2, camera_matrix);
-
-
+                VecMatMul(tri.v0, tri.v0, camera_matrix);
+                VecMatMul(tri.v1, tri.v1, camera_matrix);
+                VecMatMul(tri.v2, tri.v2, camera_matrix);
 
                 tri.Project(m_proj_matrix);
 

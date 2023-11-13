@@ -53,6 +53,12 @@ void Game::ProcessInput()
             case 'd':
                 m_camera_velocity.x = -m_movement_speed;
                 break;
+            case 'e':
+                m_camera_velocity.z = m_movement_speed;
+                break;
+            case 'q':
+                m_camera_velocity.z = -m_movement_speed;
+                break;
             default:
                 break;
             }
@@ -72,6 +78,12 @@ void Game::ProcessInput()
             case 'd':
                 m_camera_velocity.x = 0;
                 break;
+            case 'e':
+                m_camera_velocity.z = 0;
+                break;
+            case 'q':
+                m_camera_velocity.z = -0;
+                break;
             default:
                 break;
             }
@@ -86,9 +98,9 @@ void Game::ProcessInput()
 void Game::InitGame()
 {
     Vec3f positions[] = {
-        {0 , 0, 5},
+        {0 , 0, 100},
     };
-    char teapot_file[] = "assets/teapot2.obj";
+    char teapot_file[] = "assets/teapot.obj";
 
     for (size_t i = 0; i < sizeof(positions)/sizeof(Vec3f); ++i) {
         m_entities[i] = create_entity_from_file(teapot_file, 0xBBBBBBFF, positions[i]);
@@ -141,14 +153,14 @@ void Game::DrawScene()
                 float dp = VecDot(norm, light);
                 dp = std::max(MIN_BRIGHTNESS, dp);
 
-                VecMatMul(tri.v0, tri.v0, camera_matrix);
-                VecMatMul(tri.v1, tri.v1, camera_matrix);
-                VecMatMul(tri.v2, tri.v2, camera_matrix);
+                // tri.v0 = VecMatMul(tri.v0, camera_matrix);
+                // tri.v1 = VecMatMul(tri.v1, camera_matrix);
+                // tri.v2 = VecMatMul(tri.v2, camera_matrix);
 
                 tri.Project(m_proj_matrix);
 
                 if (tri.OnScreen()) {
-
+                    // tri.Scale(-1, -1, 1);
                     tri.Translate({1, 1, 0});
                     tri.Scale(0.5f * m_screen_width, 0.5f * m_screen_height, 1);
 
@@ -162,7 +174,7 @@ void Game::DrawScene()
 
     for (auto [tri, brightness] : m_triangles) {
         m_renderer.FillTriangle(tri, tri.color, brightness);
-        // m_renderer.DrawTriangle(tri, WHITE);
+        m_renderer.DrawTriangle(tri, WHITE);
     }
 
     m_renderer.Show();

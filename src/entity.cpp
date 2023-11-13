@@ -90,19 +90,20 @@ Matrix create_mat_proj(int screen_height, int screen_width, float fov, float f_n
     mat_proj.m[0][0] = aspect * f_fov_rad;
     mat_proj.m[1][1] = f_fov_rad;
     mat_proj.m[2][2] = f_far / (f_far - f_near);
-    mat_proj.m[3][2] = (-f_far * f_near) / (f_far - f_near);
-    mat_proj.m[2][3] = 1.0f;
+    mat_proj.m[2][3] = (-f_far * f_near) / (f_far - f_near);
+    mat_proj.m[3][2] = 1.0f;
+    mat_proj.m[3][3] = 0;
 
     return mat_proj;
 }
 
-void VecMatMul(Vec3f input, Vec3f &out, Matrix mat)
+Vec3f VecMatMul(Vec3f input, Matrix mat)
 {
-    out.x = input.x * mat.m[0][0] + input.y * mat.m[1][0] + input.z * mat.m[2][0] + input.w * mat.m[3][0];
-    out.y = input.x * mat.m[0][1] + input.y * mat.m[1][1] + input.z * mat.m[2][1] + input.w * mat.m[3][1];
-    out.z = input.x * mat.m[0][2] + input.y * mat.m[1][2] + input.z * mat.m[2][2] + input.w * mat.m[3][2];
-    out.w = input.x * mat.m[0][3] + input.y * mat.m[1][3] + input.z * mat.m[2][3] + input.w * mat.m[3][3];
-    // printf("%f %f %f    %f %f %f\n", input.x, input.y, input.z, out.x, out.y, out.z);
+    float x = input.x * mat.m[0][0] + input.y * mat.m[1][0] + input.z * mat.m[2][0] + input.w * mat.m[3][0];
+    float y = input.x * mat.m[0][1] + input.y * mat.m[1][1] + input.z * mat.m[2][1] + input.w * mat.m[3][1];
+    float z = input.x * mat.m[0][2] + input.y * mat.m[1][2] + input.z * mat.m[2][2] + input.w * mat.m[3][2];
+    float w = input.x * mat.m[0][3] + input.y * mat.m[1][3] + input.z * mat.m[2][3] + input.w * mat.m[3][3];
+    return {x, y, z, w};
 }
 
 float VecDot(Vec3f a, Vec3f b)
@@ -157,6 +158,7 @@ void Vec3f::Normalize()
 {
     float length = Length();
     x /= length; y /= length; z /= length;
+    w = 1;
 }
 
 bool Triangle::Visible()
@@ -172,7 +174,7 @@ bool Triangle::OnScreen()
     bool a = (v0.x > -1 && v0.x < 1) && (v0.y > -1 && v0.y < 1);
     bool b = (v1.x > -1 && v1.x < 1) && (v1.y > -1 && v1.y < 1);
     bool c = (v2.x > -1 && v2.x < 1) && (v2.y > -1 && v2.y < 1);
-    return a && b && c;
+    return a || b || c;
 }
 
 void Triangle::Translate(Vec3f update)
@@ -190,13 +192,12 @@ Vec3f rotate_x(Vec3f input, int degrees)
 
     mat.m[0][0] = 1.0f;
     mat.m[1][1] = cosf(rads);
-    mat.m[2][1] = sinf(rads);
-    mat.m[1][2] = -sinf(rads);
+    mat.m[1][2] = sinf(rads);
+    mat.m[2][1] = -sinf(rads);
     mat.m[2][2] = cosf(rads);
     mat.m[3][3] = 1.0f;
 
-    Vec3f result;
-    VecMatMul(input, result, mat);
+    Vec3f result = VecMatMul(input, mat);
     return result;
 }
 
@@ -206,14 +207,13 @@ Vec3f rotate_y(Vec3f input, int degrees)
     Matrix mat;
 
     mat.m[0][0] = cosf(rads);
-    mat.m[2][0] = sinf(rads);
+    mat.m[0][2] = sinf(rads);
     mat.m[1][1] = 1.0f;
-    mat.m[0][2] = -sinf(rads);
+    mat.m[2][0] = -sinf(rads);
     mat.m[2][2] = cosf(rads);
     mat.m[3][3] = 1.0f;
 
-    Vec3f result;
-    VecMatMul(input, result, mat);
+    Vec3f result = VecMatMul(input, mat);
     return result;
 }
 
@@ -223,14 +223,13 @@ Vec3f rotate_z(Vec3f input, int degrees)
     Matrix mat;
 
     mat.m[0][0] = cosf(rads);
-    mat.m[1][0] = sinf(rads);
-    mat.m[0][1] = -sinf(rads);
+    mat.m[0][1] = sinf(rads);
+    mat.m[1][0] = -sinf(rads);
     mat.m[1][1] = cosf(rads);
     mat.m[2][2] = 1.0f;
     mat.m[3][3] = 1.0f;
 
-    Vec3f result;
-    VecMatMul(input, result, mat);
+    Vec3f result = VecMatMul(input, mat);
     return result;    
 }
 
@@ -266,9 +265,9 @@ void Triangle::Scale(float x, float y, float z)
 void Triangle::Project(Matrix proj_matrix)
 {
     Vec3f new_v0, new_v1, new_v2;
-    VecMatMul(v0, v0, proj_matrix);
-    VecMatMul(v1, v1, proj_matrix);
-    VecMatMul(v2, v2, proj_matrix);
+    v0 = VecMatMul(v0, proj_matrix);
+    v1 = VecMatMul(v1, proj_matrix);
+    v2 = VecMatMul(v2, proj_matrix);
     if (v0.w) v0 = v0 / v0.w; 
     if (v1.w) v1 = v1 / v1.w; 
     if (v2.w) v2 = v2 / v2.w;
@@ -282,7 +281,6 @@ bool TriangleDepthCmp(const std::pair<Triangle, float> &first_pair, const std::p
     return first_center < second_center;
 }
 
-// ONLY WORKS FOR TRANSLATION/ROTATION MATRICIES
 void Matrix::Invert()
 {
     float result[4][4];
@@ -300,7 +298,7 @@ void Matrix::Invert()
 
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
-            m[j][i] = result[i][j];
+            m[i][j] = result[i][j];
         }
     }
 }
